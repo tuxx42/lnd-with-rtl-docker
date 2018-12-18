@@ -1,0 +1,60 @@
+version: '2'
+services:
+    btcd:
+      image: btcd
+      networks: [lnd]
+      container_name: blockchain
+      build:
+          context: btcd
+          dockerfile: Dockerfile
+      volumes:
+          - shared:/rpc
+          - bitcoin:/data
+      environment:
+        - RPCUSER
+        - RPCPASS
+        - NETWORK
+        - DEBUG
+        - MINING_ADDRESS
+      entrypoint: ["./start-btcd.sh"]
+
+    lnd:
+      image: lnd
+      networks: [lnd]
+      build:
+        context: lnd 
+        dockerfile: Dockerfile
+      environment:
+        - RPCUSER
+        - RPCPASS
+        - NETWORK
+        - CHAIN
+        - DEBUG
+      ports:
+          - 8080:8080
+      volumes:
+          - shared:/rpc
+          - lndconf:/root/.lnd/
+      entrypoint: ["./start-lnd.sh", "--restlisten=0.0.0.0:8080"]
+
+    rtl:
+      image: rtl:latest
+      networks: [lnd]
+      ports:
+         - 80:3000
+      volumes:
+          - lndconf:/root/.lnd/
+      entrypoint: ["node", "rtl", "--lndir", "/root/.lnd/data/chain/bitcoin/simnet/"]
+
+networks:
+  lnd:
+
+volumes:
+  shared:
+    driver: local
+
+  bitcoin:
+    driver: local
+
+  lndconf:
+    driver: local
