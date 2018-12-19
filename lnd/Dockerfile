@@ -35,3 +35,7 @@ RUN apk add --no-cache \
 # Copy the entrypoint script.
 COPY "start-lnd.sh" .
 RUN chmod +x start-lnd.sh
+
+RUN adduser -u 1000 -S lnd
+
+USER lnd

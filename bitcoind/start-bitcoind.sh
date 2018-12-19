@@ -41,13 +41,29 @@ set_default() {
 # Set default variables if needed.
 RPCUSER=$(set_default "$RPCUSER" "devuser")
 RPCPASS=$(set_default "$RPCPASS" "devpass")
-DEBUG=$(set_default "$DEBUG" "debug")
+DEBUG=$(set_default "$DEBUG" "info")
 NETWORK=$(set_default "$NETWORK" "simnet")
-CHAIN=$(set_default "$CHAIN" "bitcoin")
-BACKEND="bitcoind"
-if [[ "$CHAIN" == "litecoin" ]]; then
-    BACKEND="ltcd"
+
+PARAMS=""
+if [ "$NETWORK" != "mainnet" ]; then
+   PARAMS=$(echo --$NETWORK)
 fi
 
-exec lnd \
-    "$@"
+PARAMS=$(echo $PARAMS \
+    "-datadir=/data" \
+    "-server" \
+    "-txindex"
+)
+
+# Set the mining flag only if address is non empty.
+if [[ -n "$MINING_ADDRESS" ]]; then
+    PARAMS="$PARAMS --miningaddr=$MINING_ADDRESS"
+fi
+
+# Add user parameters to command.
+PARAMS="$PARAMS $@"
+
+# Print command and start bitcoin node.
+echo "Command: bitcoind $PARAMS"
+exec /bitcoin-0.17.0/bin/bitcoind $PARAMS
+
