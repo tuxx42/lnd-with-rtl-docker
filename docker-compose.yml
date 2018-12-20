@@ -29,14 +29,14 @@ services:
         - NETWORK
         - DEBUG
       command: ["bitcoind", "-conf=/bitcoin.conf"]
-    lnd:
+    lndalice:
       image: lnd
       networks: [lnd]
       build:
         context: lnd 
         dockerfile: Dockerfile
-        # security_opt:
-        #   - seccomp=lnd/lnd-seccomp.json
+        #security_opt:
+        #  - seccomp=lnd/lnd-seccomp.json
       environment:
         - RPCUSER
         - RPCPASS
@@ -44,8 +44,26 @@ services:
         - NETWORK
         - CHAIN
         - DEBUG
-      ports:
-          - 8080:8080
+      volumes:
+          - shared:/rpc
+          - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
+          - ./lnd/bitcoind-lnd.conf:/bitcoind-lnd.conf
+      command: ["lnd", "--configfile=/$BACKEND-lnd.conf"]
+    lndbob:
+      image: lnd
+      networks: [lnd]
+      build:
+        context: lnd 
+        dockerfile: Dockerfile
+        #security_opt:
+        #  - seccomp=lnd/lnd-seccomp.json
+      environment:
+        - RPCUSER
+        - RPCPASS
+        - BACKEND
+        - NETWORK
+        - CHAIN
+        - DEBUG
       volumes:
           - shared:/rpc
           - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
