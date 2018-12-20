@@ -33,19 +33,18 @@ COPY --from=builder /go/bin/btcd /bin/
 COPY --from=builder /go/bin/findcheckpoint /bin/
 COPY --from=builder /go/bin/gencerts /bin/
 
-COPY "start-btcctl.sh" .
-COPY "start-btcd.sh" .
+RUN adduser -u 1000 -S btcd
 
-RUN apk add --no-cache \
+RUN mkdir /rpc \
+&&  apk add --no-cache \
     bash \
     ca-certificates \
-&&  mkdir "/rpc" "/root/.btcd" "/root/.btcctl" \
-&&  touch "/root/.btcd/btcd.conf" \
-&&  chmod +x start-btcctl.sh \
-&&  chmod +x start-btcd.sh \
+&&  mkdir "/home/btcd/.btcd" "/home/btcd/.btcctl" \
+&&  touch "/home/btcd/.btcd/btcd.conf" \
 # Manually generate certificate and add all domains, it is needed to connect
 # "btcctl" and "lnd" to "btcd" over docker links.
-&& "/bin/gencerts" --host="*" --directory="/rpc" --force
+&& "/bin/gencerts" --host="*" --directory="/rpc" --force \
+&&  chown -R 1000 /rpc /home/btcd
 
 # Create a volume to house pregenerated RPC credentials. This will be
 # shared with any lnd, btcctl containers so they can securely query btcd's RPC
@@ -54,3 +53,7 @@ RUN apk add --no-cache \
 # Otherwise manually generated certificate will be overridden with shared
 # mounted volume! For more info read dockerfile "VOLUME" documentation.
 VOLUME ["/rpc"]
+
+
+RUN mkdir /data && chown -R 1000 /data
+USER btcd

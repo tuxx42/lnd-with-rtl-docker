@@ -1,5 +1,21 @@
 version: '2'
 services:
+    btcd:
+      image: btcd
+      networks: [lnd]
+      build:
+          context: btcd
+          dockerfile: Dockerfile
+      volumes:
+          - shared:/rpc
+            #- btcd:/data
+          - ./btcd/btcd.conf:/btcd.conf
+      environment:
+          - RPCUSER
+          - RPCPASS
+          - NETWORK
+          - DEBUG
+      command: ["btcd", "--configfile=/btcd.conf"]
     bitcoind:
       image: bitcoind
       networks: [lnd]
@@ -7,29 +23,26 @@ services:
           context: bitcoind
           dockerfile: Dockerfile
       volumes:
-          - shared:/rpc
-          - bitcoin:/data
+            #- bitcoin:/data
           - ./bitcoind/bitcoin.conf:/bitcoin.conf
       environment:
         - RPCUSER
         - RPCPASS
         - NETWORK
         - DEBUG
-        - MINING_ADDRESS
-      entrypoint: ["./start-bitcoind.sh", "-conf=/bitcoin.conf"]
-
+      command: ["bitcoind", "-conf=/bitcoin.conf"]
     lnd:
       image: lnd
       networks: [lnd]
       build:
         context: lnd 
         dockerfile: Dockerfile
-      security_opt:
-        - seccomp=lnd/lnd-seccomp.json
+        # security_opt:
+        #   - seccomp=lnd/lnd-seccomp.json
       environment:
         - RPCUSER
-        - BACKEND
         - RPCPASS
+        - BACKEND
         - NETWORK
         - CHAIN
         - DEBUG
@@ -37,9 +50,10 @@ services:
           - 8080:8080
       volumes:
           - shared:/rpc
-          - bitcoin:/data
-          - ./lnd/lnd.conf:/lnd.conf
-      entrypoint: ["lnd", "--configfile=/lnd.conf"]
+            #- bitcoin:/data
+          - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
+          - ./lnd/bitcoind-lnd.conf:/bitcoind-lnd.conf
+      command: ["lnd", "--configfile=/$BACKEND-lnd.conf"]
 
 networks:
   lnd:
@@ -49,6 +63,9 @@ volumes:
     driver: local
 
   bitcoin:
+    driver: local
+
+  btcd:
     driver: local
 
   lndconf:

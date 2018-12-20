@@ -32,10 +32,7 @@ COPY --from=builder /go/bin/lnd /bin/
 RUN apk add --no-cache \
     bash
 
-# Copy the entrypoint script.
-COPY "start-lnd.sh" .
-RUN chmod +x start-lnd.sh
+RUN mkdir /data && chown -R 1000 /data
 
 RUN adduser -u 1000 -S lnd
-
 USER lnd
