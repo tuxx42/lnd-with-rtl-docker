@@ -49,11 +49,13 @@ services:
           - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
           - ./lnd/bitcoind-lnd.conf:/bitcoind-lnd.conf
       command: ["lnd", "--configfile=/$BACKEND-lnd.conf"]
+      ports:
+          - 8080:8080
     lndbob:
       image: lnd
       networks: [lnd]
       build:
-        context: lnd 
+        context: lnd
         dockerfile: Dockerfile
         #security_opt:
         #  - seccomp=lnd/lnd-seccomp.json
@@ -69,10 +71,36 @@ services:
           - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
           - ./lnd/bitcoind-lnd.conf:/bitcoind-lnd.conf
       command: ["lnd", "--configfile=/$BACKEND-lnd.conf"]
+    rtl:
+      image: rtl
+      networks: [lnd]
+      build:
+        context: rtl
+        dockerfile: Dockerfile
+        #security_opt:
+        #  - seccomp=lnd/lnd-seccomp.json
+      environment:
+        - RPCUSER
+        - RPCPASS
+        - BACKEND
+        - NETWORK
+        - CHAIN
+        - DEBUG
+      volumes:
+          - ./simnet:/lnd/data/chain/bitcoin/simnet/
+          - ./lnd/btcd-lnd.conf:/btcd-lnd.conf
+          - ./lnd/bitcoind-lnd.conf:/bitcoind-lnd.conf
+      command: ["node", "rtl", "--lndir", "/lnd/data/chain/bitcoin/simnet"]
+      ports:
+         - 80:3000
+
 
 networks:
   lnd:
 
 volumes:
   shared:
+    driver: local
+
+  lnd:
     driver: local

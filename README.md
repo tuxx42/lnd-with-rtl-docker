@@ -56,3 +56,4 @@ Adding the parameters `--security-opt seccomp:lnd/lnd-seccomp.json` to the `dock
 Further reading
 
 <a name="myfootnote1">https://github.com/jessfraz/docker/blob/52f32818df8bad647e4c331878fa44317e724939/docs/security/seccomp.md</a>
+<a name="myfootnote2">https://dev.lightning.community/tutorial/01-lncli/</a>

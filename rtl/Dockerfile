@@ -6,5 +6,5 @@ WORKDIR /rtl
 
 RUN npm install
 
-RUN sed -i 's#https://localhost:8080/#https://lnd:8080/#' config.js
-RUN sed -i 's#https://localhost:8080/#https://lnd:8080/#' common.js
+RUN sed -i 's#https://localhost:8080/#https://lndalice:8080/#' config.js
+RUN sed -i 's#https://localhost:8080/#https://lndalice:8080/#' common.js
